@@ -1,8 +1,9 @@
 const PDFDocument = require('pdfkit-table');
 // const PDFTable = require("pdfkit-table");
 const fs = require('fs');
-const RpdChangeableValues = require('../modules/rpdChangeableValues');
-const RpdProfileTemplates = require('../modules/rpdProfileTemplates');
+const RpdChangeableValues = require('../models/rpd_changeable_values');
+const RpdProfileTemplates = require('../models/rpd_profile_templates');
+const { pool } = require('../../config/db');
 const { pdfTextHelper } = require('../modules/pdfTextHelper');
 const { pdfTableHelper } = require('../modules/pdfTableHelper');
 const { pdfTableHelperHours } = require('../modules/pdfTableHelperHours')
@@ -47,9 +48,9 @@ function generatePDF() {
     let jsonData = null;
 
     try {
-      uniName = await RpdChangeableValues.getChangeableValue("uniName");
-      approvalField = await RpdChangeableValues.getChangeableValue("ApprovalField");
-      jsonData = await RpdProfileTemplates.getJsonProfile("ivt_bakalavr");
+      uniName = await new RpdChangeableValues(pool).getChangeableValue("uniName");
+      approvalField = await new RpdChangeableValues(pool).getChangeableValue("ApprovalField");
+      jsonData = await new RpdProfileTemplates(pool).getJsonProfile("ivt_bakalavr");
     } catch (error) {
       reject(error);
     }
@@ -127,7 +128,6 @@ function generatePDF() {
     doc.font(TimesNewRomanNormal).text(`Дисциплина «${jsonData.disciplins_name}» относится к ${jsonData.place} учебного плана направления «${jsonData.direction_of_study}». Дисциплина преподается в ${jsonData.semester} семестре, на 1 курсе, форма промежуточной аттестации – ${jsonData.certification}`, { align: 'justify', indent: 20 }).moveDown(1);
     doc.text(jsonData.place_more_text, { align: 'justify', indent: 20 }).moveDown(1);
 
-    doc.addPage();
     doc.font(TimesNewRomanBold).text("3. Планируемые результаты обучения по дисциплине (модулю)").moveDown(2);
     doc.font(TimesNewRomanNormal);
         
@@ -136,12 +136,12 @@ function generatePDF() {
     doc.font(TimesNewRomanBold).text("4. Объем дисциплины").moveDown(2);
     doc.font(TimesNewRomanNormal).text(`Объем дисциплины составляет ${jsonData.zet} зачетных единиц, всего 144 академических часов. `, { align: 'justify' }).moveDown(1);
 
+    doc.addPage();
     doc.font(TimesNewRomanBold).text("5. Содержание дисциплины").moveDown(2);
     doc.font(TimesNewRomanNormal);
 
-    const chunkedObjects = splitObjectIntoChunks(jsonData.content, 9);
+    const chunkedObjects = splitObjectIntoChunks(jsonData.content, 10);
     for (chunk in chunkedObjects) {
-      console.log(chunk, chunkedObjects.length);
       pdfTableHelperHours(doc, chunkedObjects[chunk], chunk);
       if(chunk < chunkedObjects.length - 1) doc.addPage();
     }

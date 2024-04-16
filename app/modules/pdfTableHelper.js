@@ -31,7 +31,8 @@ module.exports.pdfTableHelper = function pdfTableHelper(doc, data) {
 
     const table = {
         headers: headers,
-        datas: datas
+        datas: datas,
+        addPage: true
     };
 
     const options = {

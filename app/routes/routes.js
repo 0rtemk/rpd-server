@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const generatePDF = require('../modules/pdfGenerator');
 const { pool } = require('../../config/db');
 
 const RpdChangeableValuesController = require('../controllers/rpdChangeableValuesController');
