@@ -13,7 +13,9 @@ const RpdProfileTemplatesController = require('../controllers/rpdProfileTemplate
 const rpdProfileTemplatesController = new RpdProfileTemplatesController(pool);
 
 router.get('/rpd-profile-templates', rpdProfileTemplatesController.getJsonProfile.bind(rpdProfileTemplatesController));
-router.put('/update-json-value/:profile_server_key', rpdProfileTemplatesController.updateById.bind(rpdProfileTemplatesController));
+router.put('/update-json-value/:id', rpdProfileTemplatesController.updateById.bind(rpdProfileTemplatesController));
+router.get('/find-by-criteria', rpdProfileTemplatesController.findByCriteria.bind(rpdProfileTemplatesController));
+router.post('/find-or-create-profile-template', rpdProfileTemplatesController.findOrCreate.bind(rpdProfileTemplatesController));
 
 const Rpd1cExchangeController = require('../controllers/rpd1cExchangeController');
 const rpd1cExchangeController = new Rpd1cExchangeController(pool);

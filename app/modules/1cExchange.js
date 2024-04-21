@@ -1,40 +1,64 @@
-const axios = require('axios');
-const mongoose = require('mongoose');
-const db = require('../../config/db');
-const Rpd1cExchange = require('../models/rpd-1c-exchange-model');
-
-const apiEndpoint = 'https://1c-api.uni-dubna.ru/v1/api/persons/reports/GetWorkProgramOfDiscipline?Year=2021&Education_Level=бакалавриат&Education_Form=очная&Profile=экономика';
+const express = require('express');
+const pool = require('../../config/db'); // Предположим, что у вас уже есть настроенный пул подключения к БД
+const fetch = require('node-fetch'); // Не забудьте установить пакет node-fetch, если он еще не установлен
 
 // Обращение к API и добавление элементов в БД
 async function addElementsToDB() {
     try {
-        const response = await axios.get(apiEndpoint); // Посылаем GET-запрос к API
-        const elements = response.data; // Предполагаем, что API возвращает массив элементов
-
-        console.log(response);
-
-        if (elements) {
-            // Добавляем каждый элемент в базу данных
-            elements.forEach(async (element) => {
-                console.log(element);
-                const newElement = new Rpd1cExchange(element);
-                await newElement.save(); // Сохраняем новый элемент в базу данных
-            });
-            console.log('Все элементы были успешно добавлены.');
-        } else {
-            console.error('Ошибка: API не вернул массив элементов.');
+        // Обращаемся к API для получения данных
+        const apiUrl = 'ВАША_ССЫЛКА_НА_API'; // Заменить на реальный URL API
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error('Ошибка при запросе данных с API');
         }
-    } catch (error) {
-        console.error('Ошибка при доступе к API или добавлении элементов в БД:', error);
-    }
+        const records = await response.json();
+    
+        // Перебираем массив записей и вставляем каждую запись в таблицу
+        for (const record of records) {
+          const {
+            year,
+            education_form,
+            education_level,
+            faculty,
+            department,
+            profile,
+            direction,
+            discipline,
+            teachers,
+            results,
+            zet,
+            place,
+            study_load,
+            semester
+          } = record;
+    
+          // Обратите внимание, что здесь используется плейсхолдеры для предотвращения SQL инъекций
+          const insertQuery = `INSERT INTO rpd_1c_exchange (year, education_form, education_level, faculty, department, profile, direction, discipline, teachers, results, zet, place, study_load, semester)
+                               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`;
+    
+          await pool.query(insertQuery, [
+            year,
+            education_form,
+            education_level,
+            faculty,
+            department,
+            profile,
+            direction,
+            discipline,
+            teachers,
+            results,
+            zet,
+            place,
+            study_load,
+            semester
+          ]);
+        }
+    
+        res.send('Данные успешно добавлены в базу данных.');
+      } catch (error) {
+        console.error(error);
+        res.status(500).send('Ошибка при обработке данных');
+      }
 }
 
-// Вызов функции добавления элементов при запуске модуля
-mongoose.connect(db.url)
-    .then(() => {
-        console.log('Connected to MongoDB');
-        addElementsToDB();
-    })
-    .catch((err) => {
-        console.error('Error connecting to MongoDB', err);
-    });
+addElementsToDB();

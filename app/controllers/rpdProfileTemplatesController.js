@@ -8,7 +8,7 @@ class RpdProfileTemplatesController {
 
   async getJsonProfile(req, res) {
     try {
-      const value = await this.model.getJsonProfile(req.query.profile_server_key);
+      const value = await this.model.getJsonProfile(req.query.id);
       if (!value) {
         return res.status(404).json({ message: 'Record not found' });
       }
@@ -25,6 +25,27 @@ class RpdProfileTemplatesController {
         return res.status(404).json({ message: 'Item not found' });
       }
       res.json(updatedItem);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+  async findByCriteria(req, res) {
+    try {
+      const { faculty, levelEducation, directionOfStudy, profile, formEducation, year } = req.query;
+      const records = await this.model.findByCriteria(faculty, levelEducation, directionOfStudy, profile, formEducation, year);
+      res.json(records);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+  async findOrCreate(req, res) {
+    try {
+      const { disciplinsName, id } = req.body;
+      const currentYear = new Date().getFullYear();
+      const record = await this.model.findOrCreateByDisciplineAndYear(disciplinsName, id, currentYear);
+      res.json(record);
     } catch (err) {
       res.status(500).json({ message: err.message });
     }
