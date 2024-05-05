@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const generatePDF = require('../modules/pdfGenerator');
+const generatePDF = require('../pdf-generator/document-generator');
 const { pool } = require('../../config/db');
 
 const RpdChangeableValuesController = require('../controllers/rpdChangeableValuesController');
@@ -23,13 +23,17 @@ const rpd1cExchangeController = new Rpd1cExchangeController(pool);
 router.get('/find-rpd', rpd1cExchangeController.findRpd.bind(rpd1cExchangeController));
 
 router.get('/generate-pdf', async (req, res) => {
-    try {
-      const pdfPath = await generatePDF();
-      res.download(pdfPath);
-    } catch (error) {
+  try {
+      const pdfBuffer = await generatePDF();
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename=example.pdf');
+      
+      res.send(pdfBuffer);
+  } catch (error) {
       console.error('Error generating PDF:', error);
       res.status(500).send('Error generating PDF');
-    }
-  });
+  }
+});
 
 module.exports = router;

@@ -12,7 +12,8 @@
     "node-fetch": "^3.3.2",
     "pdfkit": "^0.15.0",
     "pdfkit-table": "^0.1.99",
-    "pg": "^8.11.5"
+    "pg": "^8.11.5",
+    "puppeteer": "^22.7.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
