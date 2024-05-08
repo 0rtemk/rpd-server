@@ -12,9 +12,9 @@ class RpdProfileTemplates {
         }
     }
 
-    async updateById(profile_server_key, fieldToUpdate, value) {
+    async updateById(id, fieldToUpdate, value) {
         try {
-            const queryResult = await this.pool.query(`UPDATE rpd_profile_templates SET ${fieldToUpdate} = $1 WHERE profile_server_key = $2 RETURNING *`, [value, profile_server_key]);
+            const queryResult = await this.pool.query(`UPDATE rpd_profile_templates SET ${fieldToUpdate} = $1 WHERE id = $2 RETURNING *`, [value, id]);
             return queryResult.rows[0];
         } catch (err) {
             throw err;

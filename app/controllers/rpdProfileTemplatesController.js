@@ -20,7 +20,7 @@ class RpdProfileTemplatesController {
 
   async updateById(req, res) {
     try {
-      const updatedItem = await this.model.updateById(req.params.profile_server_key, req.body.fieldToUpdate, req.body.value);
+      const updatedItem = await this.model.updateById(req.params.id, req.body.fieldToUpdate, req.body.value);
       if (!updatedItem) {
         return res.status(404).json({ message: 'Item not found' });
       }
