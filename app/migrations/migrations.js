@@ -6,10 +6,8 @@ const { pool } = require('../../config/db');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS rpd_profile_templates (
         id SERIAL PRIMARY KEY,
-        profile_server_key VARCHAR(255),
         disciplins_name TEXT,
         year INTEGER,
-        uni_name TEXT,
         faculty TEXT,
         department TEXT,
         direction_of_study TEXT,
@@ -66,6 +64,35 @@ const { pool } = require('../../config/db');
         title VARCHAR(255),
         value TEXT
       );
+    `);
+
+    // Миграция для таблицы `users`
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(25) UNIQUE NOT NULL,
+        password VARCHAR(60) NOT NULL,
+        role SMALLINT NOT NULL
+      );
+    `);
+
+    // Миграция для таблицы `refresh_sessions`
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS refresh_sessions (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        refresh_token VARCHAR(400) NOT NULL,
+        finger_print VARCHAR(32) NOT NULL
+      );
+    `);
+
+    // Миграция для таблицы `teacher_templates`
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS teacher_templates (
+        id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        template_id INT NOT NULL REFERENCES rpd_profile_templates(id) ON DELETE CASCADE,
+      )
     `);
 
     console.log('Все миграции згружены успешно');

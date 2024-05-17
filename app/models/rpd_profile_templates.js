@@ -61,8 +61,8 @@ class RpdProfileTemplates {
     
             const { rows } = await this.pool.query(`
               INSERT INTO rpd_profile_templates (
-                profile_server_key, disciplins_name, year, 
-                uni_name, faculty, department, direction_of_study, profile,
+                disciplins_name, year, 
+                faculty, department, direction_of_study, profile,
                 level_education, form_education, teacher, protocol, goals, place,
                 semester, certification, place_more_text, competencies, zet, content,
                 content_more_text, content_template_more_text, methodological_support_template,
@@ -72,12 +72,11 @@ class RpdProfileTemplates {
                 $1, $2, $3, $4, $5, $6, $7, $8,
                 $9, $10, $11, $12, $13, $14,
                 $15, $16, $17, $18, $19, $20,
-                $21, $22, $23, $24, $25, $26, $27,
-                $28, $29
+                $21, $22, $23, $24, $25, $26, $27
               ) RETURNING *
             `, [
-              existingRecord.profile_server_key, disciplinsName, currentYear,
-              existingRecord.uni_name, existingRecord.faculty, existingRecord.department, existingRecord.direction_of_study, existingRecord.profile,
+              disciplinsName, currentYear,
+              existingRecord.faculty, existingRecord.department, existingRecord.direction_of_study, existingRecord.profile,
               existingRecord.level_education, existingRecord.form_education, existingRecord.teacher, existingRecord.protocol, existingRecord.goals, existingRecord.place,
               existingRecord.semester, existingRecord.certification, existingRecord.place_more_text, existingRecord.competencies, existingRecord.zet, existingRecord.content,
               existingRecord.content_more_text, existingRecord.content_template_more_text, existingRecord.methodological_support_template,
