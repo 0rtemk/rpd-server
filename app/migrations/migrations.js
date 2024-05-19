@@ -6,6 +6,7 @@ const { pool } = require('../../config/db');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS rpd_profile_templates (
         id SERIAL PRIMARY KEY,
+        status VARCHAR(60),
         disciplins_name TEXT,
         year INTEGER,
         faculty TEXT,
@@ -71,6 +72,7 @@ const { pool } = require('../../config/db');
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(25) UNIQUE NOT NULL,
+        username VARCHAR(25) NOT NUL,
         password VARCHAR(60) NOT NULL,
         role SMALLINT NOT NULL
       );
@@ -91,8 +93,8 @@ const { pool } = require('../../config/db');
       CREATE TABLE IF NOT EXISTS teacher_templates (
         id SERIAL PRIMARY KEY,
         user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        template_id INT NOT NULL REFERENCES rpd_profile_templates(id) ON DELETE CASCADE,
-      )
+        template_id INT NOT NULL REFERENCES rpd_profile_templates(id) ON DELETE CASCADE
+      );
     `);
 
     console.log('Все миграции згружены успешно');
