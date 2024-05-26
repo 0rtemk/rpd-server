@@ -21,6 +21,14 @@ const Rpd1cExchangeController = require('../controllers/rpd1cExchangeController'
 const rpd1cExchangeController = new Rpd1cExchangeController(pool);
 
 router.get('/find-rpd', rpd1cExchangeController.findRpd.bind(rpd1cExchangeController));
+router.post('/create-profile-template-from-1c', rpd1cExchangeController.createTemplate.bind(rpd1cExchangeController));
+
+const TeacherTemplatesController = require('../controllers/teacherTemplatesController');
+const teacherTemplatesController = new TeacherTemplatesController(pool);
+
+router.post('/send-template-to-teacher', teacherTemplatesController.bindTemplateWithTeacher.bind(teacherTemplatesController));
+router.post('/find-teacher-templates', teacherTemplatesController.findTeacherTemplates.bind(teacherTemplatesController));
+router.post('/employed-teacher-template', teacherTemplatesController.employedTemplate.bind(teacherTemplatesController));
 
 router.get('/generate-pdf', async (req, res) => {
   try {

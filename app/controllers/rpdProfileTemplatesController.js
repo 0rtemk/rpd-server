@@ -42,9 +42,8 @@ class RpdProfileTemplatesController {
 
   async findOrCreate(req, res) {
     try {
-      const { disciplinsName, id, year } = req.body;
-      // const currentYear = new Date().getFullYear();
-      const record = await this.model.findOrCreateByDisciplineAndYear(disciplinsName, id, year);
+      const { disciplinsName, id, year, userName } = req.body;
+      const record = await this.model.findOrCreateByDisciplineAndYear(disciplinsName, id, year, userName);
       res.json(record);
     } catch (err) {
       res.status(500).json({ message: err.message });

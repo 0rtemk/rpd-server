@@ -7,14 +7,21 @@ class Rpd1cExchangeController {
 
     async findRpd(req, res) {
         try {
-            const record = await this.model.findRpd(req.query);
-            if (!record) {
-                return res.status(404).send('Запись не найдена.');
-            }
-            res.status(200).json(record);
+            const { faculty, levelEducation, directionOfStudy, profile, formEducation, year } = req.query;
+            const records = await this.model.findRpd(faculty, levelEducation, directionOfStudy, profile, formEducation, year);
+            res.json(records);
         } catch (err) {
-            console.error('Ошибка при поиске в базе данных:', err);
-            res.status(500).send('Внутренняя ошибка сервера.');
+            res.status(500).json({ message: err.message });
+        }
+    }
+
+    async createTemplate(req, res) {
+        try {
+            const { id, teacher, year, discipline, userName } = req.body;
+            const record = await this.model.createTemplate(id, teacher, year, discipline, userName);
+            res.json(record);
+        } catch (err) {
+            res.status(500).json({ message: err.message });
         }
     }
 }

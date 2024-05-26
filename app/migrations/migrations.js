@@ -6,7 +6,6 @@ const { pool } = require('../../config/db');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS rpd_profile_templates (
         id SERIAL PRIMARY KEY,
-        status VARCHAR(60),
         disciplins_name TEXT,
         year INTEGER,
         faculty TEXT,
@@ -42,18 +41,19 @@ const { pool } = require('../../config/db');
       CREATE TABLE IF NOT EXISTS rpd_1c_exchange (
         id SERIAL PRIMARY KEY,
         year INTEGER,
-        education_form VARCHAR(255),
-        education_level VARCHAR(255),
-        faculty TEXT,
-        department TEXT,
-        profile TEXT,
-        direction TEXT,
-        discipline TEXT,
-        teachers TEXT[], -- Предполагаем массив текстовых значений
-        results TEXT[], -- Предполагаем массив текстовых значений
+        education_form VARCHAR(100),
+        education_level VARCHAR(100),
+        faculty VARCHAR(100),
+        department VARCHAR(100),
+        profile VARCHAR(100),
+        direction VARCHAR(100),
+        discipline VARCHAR(100),
+        teachers TEXT[],
+        teacher VARCHAR(100),
+        results TEXT[],
         zet INTEGER,
-        place TEXT,
-        study_load TEXT[], -- Предполагаем массив текстовых значений
+        place VARCHAR(100),
+        study_load TEXT[],
         semester INTEGER
       );
     `);
@@ -72,9 +72,10 @@ const { pool } = require('../../config/db');
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
         name VARCHAR(25) UNIQUE NOT NULL,
-        username VARCHAR(25) NOT NUL,
+        username VARCHAR(25) NOT NULL,
         password VARCHAR(60) NOT NULL,
-        role SMALLINT NOT NULL
+        role SMALLINT NOT NULL,
+        fullname JSONB
       );
     `);
 
@@ -95,6 +96,16 @@ const { pool } = require('../../config/db');
         user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         template_id INT NOT NULL REFERENCES rpd_profile_templates(id) ON DELETE CASCADE
       );
+    `);
+
+    // Миграция для таблицы `template_status`
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS template_status (
+        id SERIAL PRIMARY KEY,
+        id_1c_template INT REFERENCES rpd_1c_exchange(id) ON DELETE CASCADE,
+        id_profile_template INT REFERENCES rpd_profile_templates(id) ON DELETE CASCADE,
+        history JSONB
+      )
     `);
 
     console.log('Все миграции згружены успешно');
