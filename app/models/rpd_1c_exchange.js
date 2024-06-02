@@ -33,12 +33,12 @@ class Rpd1cExchange {
 
   async createTemplate(id_1c, complectId, teacher, year, discipline, userName) {
     try {
-      const searchResult = await this.pool.query(`
-      SELECT * FROM rpd_profile_templates
-      WHERE disciplins_name = $1 AND year = $2
-    `, [discipline, year]);
+    //   const searchResult = await this.pool.query(`
+    //   SELECT * FROM rpd_profile_templates
+    //   WHERE disciplins_name = $1 AND year = $2
+    // `, [discipline, year]);
 
-      if (searchResult.rowCount > 0) return "record exists";
+    //   if (searchResult.rowCount > 0) return "record exists";
       const templateData = await this.pool.query(`
         SELECT * FROM rpd_1c_exchange
         WHERE id = $1`, [id_1c]
