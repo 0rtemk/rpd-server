@@ -26,10 +26,10 @@ async function createPDF(htmlPages) {
     return pdf;
 }
 
-async function generatePDF() {
-    const htmlCoverPage = await generateCoverPage();
-    const htmlApprovalPage = await generateApprovalPage();
-    const htmlContentPage = await generateContentPage();
+async function generatePDF(id) {
+    const htmlCoverPage = await generateCoverPage(id);
+    const htmlApprovalPage = await generateApprovalPage(id);
+    const htmlContentPage = await generateContentPage(id);
 
     const pdfBuffer = await createPDF([htmlCoverPage, htmlApprovalPage, htmlContentPage]);
     return pdfBuffer;

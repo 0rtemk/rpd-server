@@ -107,6 +107,7 @@ class AuthService {
       id,
       role,
       name: userName,
+      fullname
     } = await UserRepository.getUserData(payload.userName);
 
     const actualPayload = { id, userName, role };
@@ -121,6 +122,8 @@ class AuthService {
     });
 
     return {
+      role,
+      fullname,
       accessToken,
       refreshToken,
       accessTokenExpiration: ACCESS_TOKEN_EXPIRATION,

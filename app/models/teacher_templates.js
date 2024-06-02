@@ -71,24 +71,27 @@ class TeacherTemplates {
             const userId = userIdResult.rows[0].id;
 
             const result = await this.pool.query(`
-                SELECT id, disciplins_name, faculty, direction_of_study, 
-                profile, level_education, form_education, year, (
-                    SELECT status FROM 
-                    jsonb_array_elements((
+                SELECT rpt.id, rpt.disciplins_name, rc.faculty,
+                rc.direction, rc.profile, rc.education_level,
+                rc.education_form, rc.year, (
+                    SELECT status
+                    FROM jsonb_array_elements((
                       SELECT history 
                       FROM template_status 
-                      WHERE id_profile_template = rpd_profile_templates.id
+                      WHERE id_profile_template = rpt.id 
                       LIMIT 1
                     )) AS elem(status)
                     ORDER BY elem DESC
                     LIMIT 1
                 )
-                FROM rpd_profile_templates
-                WHERE id IN (
-                    SELECT template_id from teacher_templates 
+                FROM rpd_profile_templates rpt
+                JOIN rpd_complects rc ON rc.id = rpt.id_rpd_complect
+                WHERE rpt.id IN (
+                    SELECT template_id
+                    FROM teacher_templates
                     WHERE user_id = $1
-                )
-            `, [userId]);
+                );`, 
+            [userId]);
 
             return result.rows;
         } catch (error) {

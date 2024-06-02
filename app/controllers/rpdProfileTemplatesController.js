@@ -8,10 +8,8 @@ class RpdProfileTemplatesController {
 
   async getJsonProfile(req, res) {
     try {
-      const value = await this.model.getJsonProfile(req.query.id);
-      if (!value) {
-        return res.status(404).json({ message: 'Record not found' });
-      }
+      const { id } = req.body;
+      const value = await this.model.getJsonProfile(id);
       res.json(value);
     } catch (err) {
       res.status(500).json({ message: err.message });

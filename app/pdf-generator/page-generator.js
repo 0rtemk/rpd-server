@@ -1,8 +1,9 @@
 const { pool } = require('../../config/db');
 const RpdChangeableValues = require('../models/rpd_changeable_values');
 const RpdProfileTemplates = require('../models/rpd_profile_templates');
+const RpdComplects = require('../models/rpd_complects');
 
-async function generateCoverPage() {
+async function generateCoverPage(id) {
     //data
     let uniName = null;
     let approvalField = null;
@@ -10,8 +11,9 @@ async function generateCoverPage() {
 
     try {
         uniName = await new RpdChangeableValues(pool).getChangeableValue("uniName");
-        approvalField = await new RpdChangeableValues(pool).getChangeableValue("ApprovalField");
-        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(1); // поменять id, брать из запроса
+        approvalField = await new RpdChangeableValues(pool).getChangeableValue("approvalField");
+        complectData = await new RpdComplects(pool).findRpdComplectData(id);
+        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(id);
     } catch (error) {
         console.log(error);
     }
@@ -71,7 +73,7 @@ async function generateCoverPage() {
                 <div>${uniName.value}</div>
             </div>
             <div class="cover-page-faculty">
-                <div>${jsonData.faculty}</div>
+                <div>${complectData.faculty}</div>
                 <div>${jsonData.department}</div>
             </div>
             <div class="cover-page-approval">
@@ -81,21 +83,21 @@ async function generateCoverPage() {
             <div class="cover-page-title">${jsonData.disciplins_name}</div>
             <div class="cover-page-subtitles">
                 <div>Направление подготовки</div>
-                <div class="cover-page-subtitles-name"><u>${jsonData.direction_of_study}</u></div>
+                <div class="cover-page-subtitles-name"><u>${jsonData.direction}</u></div>
             </div>
             <div class="cover-page-subtitles">
                 <div>Уровень высшего образования</div>
-                <div class="cover-page-subtitles-name"><u>${jsonData.level_education}</u></div>
+                <div class="cover-page-subtitles-name"><u>${jsonData.education_level}</u></div>
             </div>
             <div class="cover-page-subtitles">
                 <div>Направленность (профиль) программы</div>
-                <div class="cover-page-subtitles-name"><u>${jsonData.profile}</u></div>
+                <div class="cover-page-subtitles-name"><u>${complectData.profile}</u></div>
             </div>
             <div class="cover-page-subtitles">
                 <div>Форма(ы) обучения</div>
-                <div class="cover-page-subtitles-name"><u>${jsonData.form_education}</u></div>
+                <div class="cover-page-subtitles-name"><u>${complectData.education_form}</u></div>
             </div>
-            <div class="cover-page-year">Дубна, ${jsonData.year}</div> 
+            <div class="cover-page-year">Дубна, ${complectData.year}</div> 
         </div>
     </body>
     </html>`;
@@ -103,12 +105,12 @@ async function generateCoverPage() {
     return htmlCoverPage;
 }
 
-async function generateApprovalPage() {
+async function generateApprovalPage(id) {
     //data
     let jsonData = null;
 
     try {
-        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(1); // поменять id, брать из запроса
+        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(id);
     } catch (error) {
         console.log(error);
     }
@@ -133,7 +135,10 @@ async function generateApprovalPage() {
             }
             .approval-page-teacher {
                 position: absolute;
-                left: 30%;
+                left: 20%;
+            }
+            .approval-page-direction {
+                position: absolute;
             }
             .approval-page-teachers-caption {
                 font-size: 12px;
@@ -160,6 +165,7 @@ async function generateApprovalPage() {
                 </div>
             </div>
             <div style="padding-top: 20px">Рабочая программа разработана в соответствии с требованиями ФГОС ВО по направлению подготовки высшего образования</div>
+            <div class="approval-page-direction">${jsonData.direction}</div>
             <div>______________________________________________________________________________</div>
             <div class="approval-page-caption"><i>(код и наименование направления подготовки (специальности))</i></div>
             <div style="padding-top: 20px">Программа рассмотрена на заседании кафедры</div>
@@ -202,13 +208,13 @@ function contentResultFunc(data) {
     return summ;
 }
 
-async function generateContentPage() {
+async function generateContentPage(id) {
     //data
     let jsonData = null;
     let cource = null;
 
     try {
-        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(1); // поменять id, брать из запроса
+        jsonData = await new RpdProfileTemplates(pool).getJsonProfile(id);
         cource = Math.ceil(Number(jsonData.semester) / 2);
     } catch (error) {
         console.log(error);
@@ -344,9 +350,25 @@ async function generateContentPage() {
             <div class="content-page-title" style="padding: 20px 0">8. Ресурсное обеспечение</div>
             <div class="content-page-title">Перечень литературы</div>
             <div class="content-page-title">Основная литература</div>
-            <div class="content-page-content">${jsonData.textbook}</div>
+            <div class="content-page-content">
+                <ol>
+                    ${jsonData.textbook.map(row => {
+                        return `
+                            <li>${row}</li>
+                        `
+                    }).join('')}
+                </ol>
+            </div>
             <div class="content-page-title">Дополнительная литература</div>
-            <div class="content-page-content">${jsonData.additional_textbook}</div>
+            <div class="content-page-content">
+                <ol>
+                    ${jsonData.additional_textbook.map(row => {
+                        return `
+                            <li>${row}</li>
+                        `
+                    }).join('')}
+                </ol>
+            </div>
             <div class="content-page-title">Профессиональные базы данных и информационные справочные системы</div>
             <div class="content-page-content">${jsonData.professional_information_resources}</div>
             <div class="content-page-title" style="padding-top: 20px">Необходимое программное обеспечение</div>

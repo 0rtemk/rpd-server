@@ -7,8 +7,8 @@ class Rpd1cExchangeController {
 
     async findRpd(req, res) {
         try {
-            const { faculty, levelEducation, directionOfStudy, profile, formEducation, year } = req.query;
-            const records = await this.model.findRpd(faculty, levelEducation, directionOfStudy, profile, formEducation, year);
+            const { complectId } = req.body;
+            const records = await this.model.findRpd(complectId);
             res.json(records);
         } catch (err) {
             res.status(500).json({ message: err.message });
@@ -17,8 +17,8 @@ class Rpd1cExchangeController {
 
     async createTemplate(req, res) {
         try {
-            const { id, teacher, year, discipline, userName } = req.body;
-            const record = await this.model.createTemplate(id, teacher, year, discipline, userName);
+            const { id_1c, complectId,  teacher, year, discipline, userName } = req.body;
+            const record = await this.model.createTemplate(id_1c, complectId, teacher, year, discipline, userName);
             res.json(record);
         } catch (err) {
             res.status(500).json({ message: err.message });

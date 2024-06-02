@@ -7,7 +7,13 @@ class RpdProfileTemplates {
 
   async getJsonProfile(id) {
     try {
-      const queryResult = await this.pool.query('SELECT * FROM rpd_profile_templates WHERE id = $1', [id]);
+      const queryResult = await this.pool.query(`
+        SELECT rpt.*, rc.faculty, rc.direction,
+        rc.profile, rc.education_level, rc.education_form, rc.year
+        FROM rpd_profile_templates rpt
+        JOIN rpd_complects rc ON rc.id = rpt.id_rpd_complect
+        WHERE rpt.id = $1;
+      `, [id]);
       return queryResult.rows[0];
     } catch (err) {
       throw err;

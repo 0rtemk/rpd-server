@@ -12,7 +12,7 @@ router.put('/rpd-changeable-values/:id', rpdChangeableValuesController.updateCha
 const RpdProfileTemplatesController = require('../controllers/rpdProfileTemplatesController');
 const rpdProfileTemplatesController = new RpdProfileTemplatesController(pool);
 
-router.get('/rpd-profile-templates', rpdProfileTemplatesController.getJsonProfile.bind(rpdProfileTemplatesController));
+router.post('/rpd-profile-templates', rpdProfileTemplatesController.getJsonProfile.bind(rpdProfileTemplatesController));
 router.put('/update-json-value/:id', rpdProfileTemplatesController.updateById.bind(rpdProfileTemplatesController));
 router.get('/find-by-criteria', rpdProfileTemplatesController.findByCriteria.bind(rpdProfileTemplatesController));
 router.post('/find-or-create-profile-template', rpdProfileTemplatesController.findOrCreate.bind(rpdProfileTemplatesController));
@@ -20,7 +20,7 @@ router.post('/find-or-create-profile-template', rpdProfileTemplatesController.fi
 const Rpd1cExchangeController = require('../controllers/rpd1cExchangeController');
 const rpd1cExchangeController = new Rpd1cExchangeController(pool);
 
-router.get('/find-rpd', rpd1cExchangeController.findRpd.bind(rpd1cExchangeController));
+router.post('/find-rpd', rpd1cExchangeController.findRpd.bind(rpd1cExchangeController));
 router.post('/create-profile-template-from-1c', rpd1cExchangeController.createTemplate.bind(rpd1cExchangeController));
 
 const TeacherTemplatesController = require('../controllers/teacherTemplatesController');
@@ -30,9 +30,24 @@ router.post('/send-template-to-teacher', teacherTemplatesController.bindTemplate
 router.post('/find-teacher-templates', teacherTemplatesController.findTeacherTemplates.bind(teacherTemplatesController));
 router.post('/employed-teacher-template', teacherTemplatesController.employedTemplate.bind(teacherTemplatesController));
 
+const RpdComplectsController = require('../controllers/rpdComplectsController');
+const rpdComplectsController = new RpdComplectsController(pool);
+
+router.post('/find_rpd_complect', rpdComplectsController.findRpdComplect.bind(rpdComplectsController));
+router.post('/create_rpd_complect', rpdComplectsController.createRpdComplect.bind(rpdComplectsController));
+
+const TemplateStatusController = require('../controllers/templateStatusController');
+const templateStatusController = new TemplateStatusController(pool);
+
+router.post('/get-template-history', templateStatusController.getTemplateHistory.bind(templateStatusController));
+
+const findBooks = require('../modules/findBooks');
+router.post('/find-books', findBooks);
+
 router.get('/generate-pdf', async (req, res) => {
   try {
-      const pdfBuffer = await generatePDF();
+      const { id } = req.query;
+      const pdfBuffer = await generatePDF(id);
       
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', 'attachment; filename=example.pdf');

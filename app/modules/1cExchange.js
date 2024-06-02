@@ -2,14 +2,15 @@ const { pool } = require('../../config/db');
 const axios = require('axios');
 const moment = require('moment');
 
-async function addElementsToDB() {
-  const apiData = {
-    year: 2023,
-    educationLevel: "бакалавриат",
-    educationForm: "очная",
-    profile: "Технологии разработки программного обеспечения",
-    direction: "09.03.01 Информатика и вычислительная техника"
-  }
+async function exchange1C(apiData) {
+  // const apiData = {
+  //   faculty: "Институт системного анализа и управления",
+  //   year: 2023,
+  //   educationLevel: "бакалавриат",
+  //   educationForm: "очная",
+  //   profile: "Технологии разработки программного обеспечения",
+  //   direction: "09.03.01 Информатика и вычислительная техника"
+  // }
 
   try {
     const apiUrl = `https://1c-api.uni-dubna.ru/v1/api/persons/reports/GetWorkProgramOfDiscipline?Year=${apiData.year}&Education_Level=${apiData.educationLevel}&Education_Form=${apiData.educationForm}&Profile=${apiData.profile}&Direction=${apiData.direction}`;
@@ -20,6 +21,31 @@ async function addElementsToDB() {
     const records = await responseUrl.data;
     const recordsLength = records.length;
     console.log(`Всего дисциплин из запроса - ${recordsLength}`);
+
+    const createRpdComplect = await pool.query(`
+    INSERT INTO rpd_complects (
+      faculty,
+      year,
+      education_form,
+      education_level,
+      profile,
+      direction
+    ) VALUES (
+      $1, $2, $3, $4, $5, $6
+    ) RETURNING id
+    `, [
+      apiData.faculty, 
+      apiData.year, 
+      apiData.educationForm,
+      apiData.educationLevel,
+      apiData.profile,
+      apiData.direction
+    ]);
+
+    const RpdComplectId = createRpdComplect.rows[0].id;
+    if(!RpdComplectId) {
+      throw new Error('Ошибка создания комплекта РПД');
+    }
 
     let currentIndex = 0;
     for (const record of records) {
@@ -32,13 +58,7 @@ async function addElementsToDB() {
       const educationResults = await responseUpLink.data;
 
       const {
-        year,
-        education_form,
-        education_level,
-        faculty,
         department,
-        profile,
-        direction,
         discipline,
         teachers,
         zet,
@@ -49,13 +69,8 @@ async function addElementsToDB() {
 
       const insertQuery = `
       INSERT INTO rpd_1c_exchange (
-        year, 
-        education_form, 
-        education_level, 
-        faculty, 
-        department, 
-        profile, 
-        direction, 
+        id_rpd_complect,
+        department,  
         discipline, 
         teachers, 
         results, 
@@ -64,25 +79,20 @@ async function addElementsToDB() {
         study_load, 
         semester
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
       ) 
       ON CONFLICT DO NOTHING
       RETURNING id`;
 
       const result = await pool.query(insertQuery, [
-        year,
-        education_form,
-        education_level,
-        faculty,
+        RpdComplectId,
         department,
-        profile,
-        direction,
         discipline,
         teachers,
         educationResults,
         zet,
         place,
-        study_load,
+        JSON.stringify(study_load),
         semester,
       ]);
 
@@ -100,9 +110,10 @@ async function addElementsToDB() {
     }
 
     console.log('Данные успешно добавлены в базу данных.');
+    return RpdComplectId;
   } catch (error) {
     console.error(error);
   }
 }
 
-addElementsToDB();
+module.exports = { exchange1C }
